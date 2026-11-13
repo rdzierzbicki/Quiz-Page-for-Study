@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f3f1eb">
+  <meta name="description" content="Procedura nr 18 — Weryfikacja dojrzałości">
+  <title>Procedura nr 18 | Weryfikacja dojrzałości</title>
+  <style>
+    :root { color-scheme: light; --ink:#243331; --muted:#63716c; --line:#d7ddd5; --paper:#fffefa; --bg:#f3f1eb; --green:#204c42; --mint:#e8f1e9; --gold:#c3a267; }
+    * { box-sizing:border-box; }
+    html { min-height:100%; }
+    body { margin:0; background: radial-gradient(circle at 10% 0%, #e6eee7, transparent 40%), var(--bg); color:var(--ink); font-family:system-ui,-apple-system,"Segoe UI",sans-serif; }
+    button { font:inherit; }
+    .layout { max-width:640px; margin:auto; min-height:100svh; padding:24px 16px max(34px,env(safe-area-inset-bottom)); display:flex; flex-direction:column; justify-content:center; }
+    .top { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; gap:12px; color:var(--green); font-size:.72rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+    .mark { display:inline-flex; gap:9px; align-items:center; }
+    .mark-icon { display:grid; place-items:center; width:33px; height:33px; border:1px solid #b8cfc2; border-radius:9px; background:#e7f0e9; font-size:1.15rem; }
+    .document { background:var(--paper); border:1px solid var(--line); box-shadow:0 16px 55px rgba(37,54,45,.09); border-radius:19px; overflow:hidden; }
+    .ribbon { display:flex; justify-content:space-between; gap:10px; padding:12px 22px; background:var(--green); color:#fff; font-size:.69rem; font-weight:750; letter-spacing:.09em; text-transform:uppercase; }
+    .content { padding:clamp(22px,6vw,42px); }
+    .screen { animation:show .32s ease both; }
+    .screen[hidden] { display:none !important; }
+    .code { color:var(--green); font-size:.75rem; font-weight:850; letter-spacing:.11em; text-transform:uppercase; }
+    .stamp { width:67px; height:67px; display:grid; place-items:center; margin-bottom:18px; border:2px solid #98b3a3; border-radius:50%; color:var(--green); background:var(--mint); font-weight:900; font-size:1.4rem; transform:rotate(-10deg); }
+    h1 { font-size:clamp(1.75rem,6.5vw,2.55rem); line-height:1.11; letter-spacing:-.035em; margin:11px 0 23px; }
+    h2 { font-size:clamp(1.45rem,5.4vw,1.9rem); line-height:1.22; letter-spacing:-.025em; margin:12px 0 16px; }
+    p { font-size:1rem; line-height:1.72; margin:0 0 17px; }
+    .lead { font-size:1.06rem; font-weight:750; }
+    .notice { background:#f0f5ef; border-left:4px solid var(--green); padding:15px 17px; border-radius:0 10px 10px 0; margin:22px 0 0; color:#38574c; font-size:.92rem; line-height:1.6; }
+    .label { color:var(--muted); font-size:.77rem; font-weight:750; text-transform:uppercase; letter-spacing:.08em; }
+    .btn { display:flex; justify-content:center; align-items:center; width:100%; min-height:53px; padding:13px 17px; margin-top:27px; border:0; border-radius:10px; background:var(--green); color:white; font-weight:800; cursor:pointer; transition:filter .15s,transform .15s; }
+    .btn:hover { filter:brightness(1.12); }
+    .btn:active { transform:scale(.98); }
+    .btn:focus-visible,.answer:focus-visible { outline:3px solid #b99a63; outline-offset:3px; }
+    .btn:disabled { background:#a6b4ac; cursor:not-allowed; }
+    .secondary { background:#e6ede6; color:var(--green); }
+    .progress-head { display:flex; justify-content:space-between; gap:12px; margin-bottom:10px; font-size:.77rem; font-weight:750; color:var(--muted); }
+    .progress { height:7px; background:#e8ede8; border-radius:99px; overflow:hidden; margin-bottom:29px; }
+    .progress-fill { height:100%; width:0; background:var(--green); border-radius:inherit; transition:width .28s ease; }
+    .answers { display:grid; gap:10px; margin-top:25px; }
+    .answer { display:flex; gap:13px; align-items:flex-start; width:100%; text-align:left; border:1.5px solid var(--line); background:#fff; color:var(--ink); padding:14px; border-radius:11px; line-height:1.45; cursor:pointer; transition:background .16s,border-color .16s; }
+    .answer:hover { background:#f7faf6; }
+    .answer.selected { background:#e9f2ea; border-color:#3c7963; }
+    .letter { flex:0 0 28px; height:28px; display:grid; place-items:center; border:1px solid #c7d7ca; border-radius:7px; font-weight:800; color:var(--green); }
+    .answer.selected .letter { background:var(--green); color:white; border-color:var(--green); }
+    .small { font-size:.85rem; color:var(--muted); line-height:1.55; }
+    .verdict { border:2px solid #689480; border-radius:13px; background:#eff6f0; text-align:center; padding:25px 17px; margin:24px 0; }
+    .verdict .big { font-size:2.8rem; margin-bottom:8px; }
+    .verdict strong { display:block; color:var(--green); font-size:1.11rem; letter-spacing:.05em; }
+    .footer { text-align:center; color:#77867c; padding:17px 10px 0; font-size:.72rem; letter-spacing:.035em; }
+    .confetti-layer { position:fixed; inset:0; z-index:10; pointer-events:none; overflow:hidden; }
+    .confetti { position:absolute; top:-30px; width:9px; height:14px; border-radius:2px; animation:fall linear forwards; }
+    @keyframes show { from { opacity:0; transform:translateY(9px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fall { to { transform:translate(var(--drift),110svh) rotate(650deg); opacity:0; } }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important; transition-duration:.01ms!important; } }
+  </style>
+</head>
+<body>
+  <div class="confetti-layer" id="confetti" aria-hidden="true"></div>
+  <main class="layout">
+    <header class="top"><span class="mark"><span class="mark-icon">✚</span> Departament dorosłości</span><span>Formularz 18/18</span></header>
+    <div class="document">
+      <div class="ribbon"><span>Dokument urzędowy*</span><span>Wydział pełnoletności</span></div>
+      <div class="content">
+        <section class="screen" id="intro">
+          <div class="stamp" aria-hidden="true">18+</div>
+          <div class="code">Procedura nr 18</div>
+          <h1>WERYFIKACJA DOJRZAŁOŚCI</h1>
+          <p class="lead">Szanowna Pacjentko!</p>
+          <p>W związku z ukończeniem 18. roku życia zostałaś zakwalifikowana do obowiązkowej procedury weryfikacyjnej.</p>
+          <p>Przed wydaniem przepisanego pakietu pełnoletności wymagana jest weryfikacja gotowości do samodzielnego funkcjonowania.</p>
+          <p>Warunkiem odbioru prezentu jest przystąpienie do testu dojrzałości oraz uzyskanie pozytywnego wyniku.</p>
+          <p>Uprzejmie prosimy o udzielenie odpowiedzi na wszystkie pytania.</p>
+          <div class="notice">Status pacjentki: <strong>zakwalifikowana do badania</strong><br>Wymagane działanie: przystąpienie do testu</div>
+          <button class="btn" id="start" type="button">Przystępuję do procedury →</button>
+        </section>
+        <section class="screen" id="instructions" hidden>
+          <div class="code">Etap 01 / instruktaż</div>
+          <h1>TEST DOJRZAŁOŚCI</h1>
+          <p class="lead">Instrukcja:</p>
+          <p>Przeczytaj uważnie każde pytanie i zaznacz jedną odpowiedź.</p>
+          <p>Pamiętaj, że system rejestruje wszystkie udzielone odpowiedzi.</p>
+          <div class="notice"><strong>8 pytań</strong> · Jedna odpowiedź na pytanie · Brak limitu czasu</div>
+          <button class="btn" id="begin" type="button">Rozpocznij test →</button>
+        </section>
+        <section class="screen" id="quiz" hidden>
+          <div class="progress-head"><span>TEST DOJRZAŁOŚCI</span><span id="counter">1 / 8</span></div>
+          <div class="progress" aria-hidden="true"><div class="progress-fill" id="progress-fill"></div></div>
+          <div class="label" id="question-number">Pytanie 01</div>
+          <h2 id="question"></h2>
+          <div class="answers" id="answers" role="group" aria-label="Wybierz jedną odpowiedź"></div>
+          <button class="btn" id="next" type="button" disabled>Wybierz odpowiedź</button>
+          <p class="small" style="text-align:center;margin:12px 0 0">Odpowiedź zostanie zapisana w protokole weryfikacji.</p>
+        </section>
+        <section class="screen" id="ending" hidden>
+          <div class="code">Procedura nr 18 · Zakończona</div>
+          <h1>GRATULACJE!</h1>
+          <div class="verdict"><div class="big" aria-hidden="true">✓ 🎁</div><strong>WYNIK POZYTYWNY</strong><span class="small">Status: pełnoletność zatwierdzona</span></div>
+          <p>Pacjentka pomyślnie przeszła test i uzyskała uprawnienia do odbioru Pakietu Pełnoletności.</p>
+          <p>Od tej chwili wszelkie konsekwencje podejmowanych decyzji przechodzą na pacjentkę.</p>
+          <div class="notice">Uprawnienie do odbioru prezentu: <strong>PRZYZNANE ✓</strong></div>
+          <button class="btn secondary" id="again" type="button">Wypełnij ponownie ↻</button>
+        </section>
+      </div>
+    </div>
+    <footer class="footer">* Dokument o charakterze urodzinowym · Wszelkie prawa do świętowania zastrzeżone 🎂</footer>
+  </main>
+  <script>
+    // ✏️ W tym miejscu można zmieniać pytania i odpowiedzi.
+    // Każda odpowiedź jest akceptowana — wynik zawsze jest pozytywny.
+    const QUESTIONS = [
+      {
+        question: "Jak oceniasz swoją gotowość do dorosłego życia?",
+        answers: [
+          "Jestem gotowa, mam wszystko pod kontrolą. Chyba.",
+          "Dam sobie radę, ale przydałaby się jakaś instrukcja obsługi.",
+          "Szczerze? Nadal nie wiem, jakim cudem mam już 18 lat.",
+          "Czuję się dorosła, dopóki nikt nie każe mi załatwiać czegoś w urzędzie."
+        ]
+      },
+      {
+        question: "Co według Ciebie jest największym osiągnięciem dorosłego człowieka?",
+        answers: [
+          "Opłacenie wszystkich rachunków i nadal posiadanie pieniędzy na koncie.",
+          "Zrobienie obiadu na kilka dni i faktycznie jedzenie go przez kilka dni.",
+          "Pójście spać o normalnej godzinie i wstanie bez miliona drzemek.",
+          "Wejście do sklepu po jedną rzecz i wyjście tylko z tą jedną rzeczą."
+        ]
+      },
+      {
+        question: "Jakie jest Twoje podejście do obowiązków?",
+        answers: [
+          "Robię, co trzeba, żeby mieć później święty spokój.",
+          "Najpierw odpocznę, potem się za to zabiorę. Wiadomo, jak to się kończy.",
+          "Mam plan, tylko jakoś ciężko przejść do jego realizacji.",
+          "Jeśli nikt mi nie przypomina, to może jednak nie było aż tak pilne?"
+        ]
+      },
+      {
+        question: "Co oznacza dla Ciebie niezależność finansowa?",
+        answers: [
+          "Mogę kupić sobie coś bez zastanawiania się, czy mnie stać.",
+          "Pieniądze są, ale jakoś szybko przestają być.",
+          "Umiem oszczędzać, ale promocje to mój największy przeciwnik.",
+          "Brzmi super, tylko jeszcze nie wiem, jak to działa w praktyce."
+        ]
+      },
+      {
+        question: "Jakie jest Twoje największe zagrożenie w dorosłym życiu?",
+        answers: [
+          "Podatki, rachunki i wszystkie te rzeczy, których nikt nie tłumaczy.",
+          "Wypłata, która znika szybciej, niż zdążyłam się nią nacieszyć.",
+          "Konieczność podejmowania ważnych decyzji bez konsultacji z mamą.",
+          "Poniedziałek rano. Zdecydowanie poniedziałek rano."
+        ]
+      },
+      {
+        question: "Kiedy można uznać człowieka za naprawdę dorosłego?",
+        answers: [
+          "Kiedy potrafi samodzielnie zadbać o siebie i swoje sprawy.",
+          "Kiedy zaczyna rozumieć, dlaczego dorośli tak narzekają na ceny.",
+          "Kiedy ma już dość odkładania wszystkiego na jutro.",
+          "Kiedy zakupy do domu zaczynają sprawiać mu podejrzanie dużo radości."
+        ]
+      },
+      {
+        question: "Wybierz umiejętność, która najbardziej przyda Ci się w dorosłym życiu.",
+        answers: [
+          "Zarządzanie własnym budżetem, żeby nie żyć na samym początku miesiąca jak królowa.",
+          "Gotowanie czegoś sensownego z trzech przypadkowych składników.",
+          "Zachowanie spokoju, nawet jeśli wszystko idzie nie tak.",
+          "Udawanie, że dokładnie wiem, co robię. Ta umiejętność może uratować życie."
+        ]
+      },
+      {
+        question: "Czy czujesz się gotowa na pełnoletność?",
+        answers: [
+          "Tak, jestem przygotowana na wszystko. Dawajcie mi te dorosłe obowiązki.",
+          "Tak, ale chciałabym mieć możliwość zwrotu w ciągu 14 dni.",
+          "Nie, ale skoro już się stało, to jakoś trzeba to ogarnąć.",
+          "Poproszę o rozmowę z osobą, która wie, co robi. Najlepiej dorosłą."
+        ]
+      }
+    ];
+
+    const $ = id => document.getElementById(id);
+    const screens = ["intro", "instructions", "quiz", "ending"];
+    let questionIndex = 0;
+    let selection = null;
+    let responses = [];
+
+    function showScreen(name) {
+      for (const id of screens) {
+        $(id).hidden = id !== name;
+        if (id === name) { $(id).style.animation = "none"; void $(id).offsetWidth; $(id).style.animation = ""; }
+      }
+      window.scrollTo({top: 0, behavior: "instant"});
+    }
+
+    function renderQuestion() {
+      const item = QUESTIONS[questionIndex];
+      selection = null;
+      $("counter").textContent = `${questionIndex + 1} / ${QUESTIONS.length}`;
+      $("question-number").textContent = `Pytanie ${String(questionIndex + 1).padStart(2, "0")}`;
+      $("progress-fill").style.width = `${((questionIndex + 1) / QUESTIONS.length) * 100}%`;
+      $("question").textContent = item.question;
+      $("answers").replaceChildren();
+      $("next").disabled = true;
+      $("next").textContent = "Wybierz odpowiedź";
+      item.answers.forEach((answer, i) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "answer";
+        btn.setAttribute("aria-pressed", "false");
+        const letter = document.createElement("span");
+        letter.className = "letter";
+        letter.textContent = "ABCD"[i];
+        const content = document.createElement("span");
+        content.textContent = answer;
+        btn.append(letter, content);
+        btn.addEventListener("click", () => {
+          selection = i;
+          for (const el of $("answers").children) {
+            el.classList.remove("selected");
+            el.setAttribute("aria-pressed", "false");
+          }
+          btn.classList.add("selected");
+          btn.setAttribute("aria-pressed", "true");
+          $("next").disabled = false;
+          $("next").textContent = questionIndex === QUESTIONS.length - 1 ? "Zakończ test →" : "Następne pytanie →";
+        });
+        $("answers").append(btn);
+      });
+    }
+
+    function celebrate() {
+      const layer = $("confetti");
+      layer.replaceChildren();
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const colors = ["#204c42", "#a9c6a9", "#c3a267", "#f0ca79", "#e4a5ac"];
+      for (let i = 0; i < 65; i++) {
+        const piece = document.createElement("span");
+        piece.className = "confetti";
+        piece.style.left = `${Math.random() * 100}%`;
+        piece.style.background = colors[i % colors.length];
+        piece.style.animationDuration = `${2.5 + Math.random() * 2.7}s`;
+        piece.style.animationDelay = `${Math.random() * 1.2}s`;
+        piece.style.setProperty("--drift", `${Math.random() * 210 - 105}px`);
+        piece.addEventListener("animationend", () => piece.remove());
+        layer.append(piece);
+      }
+    }
+
+    $("start").addEventListener("click", () => showScreen("instructions"));
+    $("begin").addEventListener("click", () => { questionIndex = 0; responses = []; renderQuestion(); showScreen("quiz"); });
+    $("next").addEventListener("click", () => {
+      if (selection === null) return;
+      responses[questionIndex] = selection;
+      questionIndex++;
+      if (questionIndex === QUESTIONS.length) { showScreen("ending"); celebrate(); }
+      else { renderQuestion(); showScreen("quiz"); }
+    });
+    $("again").addEventListener("click", () => { questionIndex = 0; selection = null; responses = []; showScreen("intro"); });
+  </script>
+</body>
+</html>
